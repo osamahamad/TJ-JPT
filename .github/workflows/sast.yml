@@ -1,0 +1,55 @@
+name: Manual Semgrep SAST
+
+on:
+  workflow_dispatch:
+
+jobs:
+  semgrep:
+    name: Run Semgrep and Report to GitHub Summary
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Install Semgrep
+        run: |
+          python -m pip install --upgrade pip
+          pip install semgrep
+
+      - name: 🔍 Run Semgrep scan
+        run: semgrep --config auto --json -o semgrep_output.json
+
+      - name: 📝 Generate GitHub Summary
+        run: |
+          python3 <<'EOF'
+          import os
+          import json
+
+          with open("semgrep_output.json") as f:
+              data = json.load(f)
+
+          summary = ["## 🛡️ Semgrep SAST Report\n"]
+
+          if not data.get("results"):
+              summary.append("✅ No issues detected.\n")
+          else:
+              for idx, result in enumerate(data["results"], 1):
+                  check_id = result.get("check_id", "N/A")
+                  severity = result.get("extra", {}).get("severity", "N/A")
+                  message = result.get("extra", {}).get("message", "")
+                  file = result.get("path", "N/A")
+                  line = result.get("start", {}).get("line", "N/A")
+                  summary.append(f"### {idx}. ⚠️ `{check_id}`")
+                  summary.append(f"- **Severity**: `{severity}`")
+                  summary.append(f"- **Message**: {message}")
+                  summary.append(f"- **Location**: `{file}:{line}`\n")
+
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "w") as summary_file:
+              summary_file.write("\n".join(summary))
+          EOF
