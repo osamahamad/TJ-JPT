@@ -14,3 +14,6 @@ jobs:
       checks: write # Required for writing CI check runs
       pull-requests: write # Required for writing comments with scan results to pull requests
       security-events: write # Required for collection of SARIF code scanning results for GitHub Advanced Security checks
+    with:
+      fail-on-findings: true
+      post-pr-comment: true
