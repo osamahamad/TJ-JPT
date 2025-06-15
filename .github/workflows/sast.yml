@@ -1,4 +1,4 @@
-name: Run ASH New
+name: Run ASH
 on:
   pull_request:
     branches:
@@ -6,8 +6,6 @@ on:
   workflow_dispatch: {}
 env:
   PYTHON_VERSION: "3.12"
-permissions:
-  
 jobs:
   ash:
     uses: awslabs/automated-security-helper/.github/workflows/run-ash-security-scan.yml@v3.0.0-beta
