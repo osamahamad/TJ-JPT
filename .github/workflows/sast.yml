@@ -1,4 +1,4 @@
-name: Run ASH
+name: Run ASHn
 on:
   pull_request:
     branches:
